@@ -48,15 +48,37 @@ export function setupCanvas(element){
     initializeGame(context)
 
     //identify clicks
+    let clickActive = true;
+    let lastClicked;
+    let turn = 0;
     canvas.addEventListener('click', function(event) {
-        let x = event.offsetX;
-        let y = event.offsetY;
-        let row = Math.floor(y/cube);
-        let col = Math.floor(x/cube);
-        console.log(row,col)
-        console.log(board[row][col])
-        context.fillStyle = "green";
-        context.fillRect(board[row][col].x,board[row][col].y,cube,cube);
+        let row = Math.floor(event.offsetY/cube);
+        let col = Math.floor(event.offsetX/cube);
+        let verifyClick = ()=>{
+            if(pieces[row][col].occupant==null || turn!=pieces[row][col].occupant) return false;
+            clickActive=!clickActive;
+            console.log('Inner',clickActive)
+            return true;
+        };
+        console.log(pieces[row][col])
+        console.log(verifyClick())
+        if(verifyClick()){
+            context.fillStyle = "green";
+            context.fillRect(board[row][col].x,board[row][col].y,cube,cube);
+            drawPiece(context,board[row][col].x+cube/2,board[row][col].y+cube/2,board[row][col].occupant==1?"#ff0000":"#ffff00")
+            if(clickActive){
+                console.log("first click",clickActive)
+                context.fillStyle = lastClicked.colour;
+                context.fillRect(lastClicked.x,lastClicked.y,cube,cube);
+                drawPiece(context,lastClicked.x+cube/2,lastClicked.y+cube/2,lastClicked.occupant==1?"#ff0000":"#ffff00")                
+            }
+            context.fillStyle = lastClicked.colour;
+            context.fillRect(lastClicked.x,lastClicked.y,cube,cube);
+            drawPiece(context,lastClicked.x+cube/2,lastClicked.y+cube/2,lastClicked.occupant==1?"#ff0000":"#ffff00")
+            lastClicked = board[row][col]
+        }else{
+            console.log("not a valid click")
+        }
     })
 
     //game logic
@@ -65,31 +87,31 @@ export function setupCanvas(element){
      * 
     */
 }
-
+function drawPiece(context,x,y,colour){
+    let radius = cube/3
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI);
+    context.fillStyle = colour;
+    context.fill();
+    context.closePath();
+    
+    // Draw the outline of the checker piece
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI);
+    context.strokeStyle = "#000000";
+    context.lineWidth = 5;
+    context.stroke();
+    context.closePath();
+}
 function initializeGame(context){
-    let drawPiece = (x,y,colour)=>{
-        let radius = cube/2
-        context.beginPath();
-        context.arc(x, y, radius, 0, 2 * Math.PI);
-        context.fillStyle = colour;
-        context.fill();
-        context.closePath();
-        
-        // Draw the outline of the checker piece
-        context.beginPath();
-        context.arc(x, y, radius, 0, 2 * Math.PI);
-        context.strokeStyle = "#000000";
-        context.lineWidth = 5;
-        context.stroke();
-        context.closePath();
-    }
     //for the center of every cube draw a piece
     for(let i=0;i<Nrows;i++){
         if(i==3||i==4) continue
         for(let j=0;j<Ncol;j++){
             if(board[i][j].colour=="black"){
                 board[i][j].occupied=true;
-                drawPiece(board[i][j].x+cube/2,board[i][j].y+cube/2,i>3?"#ff0000":"#ffff00")//black(bottom):white(top)
+                pieces[i][j].occupant=i>3?1:0;
+                drawPiece(context,board[i][j].x+cube/2,board[i][j].y+cube/2,i>3?"#ff0000":"#ffff00")//black(bottom):white(top)
                 board[i][j].occupant=i>3?1:0;
             }
         }
