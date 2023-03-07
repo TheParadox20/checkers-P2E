@@ -49,33 +49,33 @@ export function setupCanvas(element){
 
     //identify clicks
     let clickActive = true;
-    let lastClicked;
     let turn = 0;
+    let lastClicked={};
     canvas.addEventListener('click', function(event) {
         let row = Math.floor(event.offsetY/cube);
         let col = Math.floor(event.offsetX/cube);
         let verifyClick = ()=>{
             if(pieces[row][col].occupant==null || turn!=pieces[row][col].occupant) return false;
             clickActive=!clickActive;
-            console.log('Inner',clickActive)
             return true;
         };
-        console.log(pieces[row][col])
-        console.log(verifyClick())
         if(verifyClick()){
             context.fillStyle = "green";
             context.fillRect(board[row][col].x,board[row][col].y,cube,cube);
             drawPiece(context,board[row][col].x+cube/2,board[row][col].y+cube/2,board[row][col].occupant==1?"#ff0000":"#ffff00")
             if(clickActive){
-                console.log("first click",clickActive)
                 context.fillStyle = lastClicked.colour;
                 context.fillRect(lastClicked.x,lastClicked.y,cube,cube);
                 drawPiece(context,lastClicked.x+cube/2,lastClicked.y+cube/2,lastClicked.occupant==1?"#ff0000":"#ffff00")                
             }
-            context.fillStyle = lastClicked.colour;
-            context.fillRect(lastClicked.x,lastClicked.y,cube,cube);
-            drawPiece(context,lastClicked.x+cube/2,lastClicked.y+cube/2,lastClicked.occupant==1?"#ff0000":"#ffff00")
-            lastClicked = board[row][col]
+            if(lastClicked!={}){
+                context.fillStyle = lastClicked.colour;
+                context.fillRect(lastClicked.x,lastClicked.y,cube,cube);
+                console.log(lastClicked)
+            }
+            drawPiece(context,lastClicked.x+cube/2,lastClicked.y+cube/2,lastClicked.occupant==1?"#ff0000":"#ffff00");
+            console.log(lastClicked,board[row][col]);
+            lastClicked = board[row][col];
         }else{
             console.log("not a valid click")
         }
