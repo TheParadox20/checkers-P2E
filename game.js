@@ -55,7 +55,7 @@ export function setupCanvas(element){
     let lastPath=[];
     canvas.addEventListener('click', function(event) {
         //helper functions
-        let cleaPath = ()=>{
+        let clearPath = ()=>{
             for(let i=0;i<lastPath.length;i++){
                 let row = Math.floor(lastPath[i]/8);
                 let col = lastPath[i]%8;
@@ -69,12 +69,10 @@ export function setupCanvas(element){
 
         let row = Math.floor(event.offsetY/cube);
         let col = Math.floor(event.offsetX/cube);
-        console.log(board[row][col]);
         //try a move
         if(lastPath.indexOf(board[row][col].id)>=0){//check if the clicked square is in the path
-            console.log("valid move");
             //get colour of last clicked
-            cleaPath();
+            clearPath();
             context.fillStyle =board[row][col].colour;
             context.fillRect(board[row][col].x,board[row][col].y,cube,cube);
             drawPiece(context,board[row][col].x+cube/2,board[row][col].y+cube/2,lastClicked.occupant==1?"#ff0000":"#ffff00")
@@ -105,12 +103,24 @@ export function setupCanvas(element){
             let diagonals = x%8==0||x%8==7?x%8==7?[x-9,x+7]:[x-7,x+9]:[(x-9),(x-7),(x+7),(x+9)];//note: not included top most and bottom most rows
             let path = pieces[row][col].direction!=0?diagonals.slice(0,diagonals.length/2):diagonals.slice(diagonals.length/2);
             //todo: validate path
-            path.forEach(step => {//validating each step
+            path.push(0);
+            // console.log(path);
+            path.forEach((step,index) => {//validating each step
+                let row = Math.floor(step/8);
+                let col = step%8;
+                // console.log(index,'.)',step,row,col);
+                console.log(step,board[row][col].occupied);
+                if(board[row][col].occupied){
+                    // path.splice(index,1);//remove step from path
+                    // console.log(step,"occupied",path);
+                }
             });
+            path.pop();
+            // console.log(path);
             //show paths by drawing circles
             //but first clear last paths
             if(lastPath!=[]){
-                cleaPath();
+                clearPath();
             }
             //then draw new paths
             for(let i=0;i<path.length;i++){
